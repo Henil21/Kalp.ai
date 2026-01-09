@@ -5,7 +5,7 @@ export default function Architecture() {
 
         {/* Title */}
         <h2 className="text-3xl md:text-4xl font-serif italic text-text-main">
-          The Architecture of Verification
+          How the Platform Works
         </h2>
 
         {/* Diagram Card */}
@@ -17,35 +17,35 @@ export default function Architecture() {
           {/* Nodes */}
           <div className="relative z-10 grid grid-cols-4 gap-6 items-center">
 
-            {/* Submission */}
+            {/* Researcher */}
             <div className="flex flex-col items-center gap-4">
-              <div className="size-4 rounded-full bg-white border-4 border-[#8c8b5f]" />
-              <span className="text-xs tracking-widest font-bold uppercase text-text-muted">
-                Submission
-              </span>
-            </div>
-
-            {/* AI Scan (active) */}
-            <div className="flex flex-col items-center gap-4">
-              <div className="size-4 rounded-full bg-white border-4 border-primary animate-pulse" />
+              <div className="size-4 rounded-full bg-white border-4 border-primary" />
               <span className="text-xs tracking-widest font-bold uppercase text-text-main">
-                AI Scan
+                Researcher
               </span>
             </div>
 
-            {/* Peer Review */}
+            {/* Publish */}
             <div className="flex flex-col items-center gap-4">
               <div className="size-4 rounded-full bg-white border-4 border-[#8c8b5f]" />
               <span className="text-xs tracking-widest font-bold uppercase text-text-muted">
-                Peer Review
+                Publish Research
               </span>
             </div>
 
-            {/* Publication */}
+            {/* Explorer */}
             <div className="flex flex-col items-center gap-4">
               <div className="size-4 rounded-full bg-white border-4 border-[#8c8b5f]" />
               <span className="text-xs tracking-widest font-bold uppercase text-text-muted">
-                Publication
+                Explorer
+              </span>
+            </div>
+
+            {/* Read */}
+            <div className="flex flex-col items-center gap-4">
+              <div className="size-4 rounded-full bg-white border-4 border-[#8c8b5f]" />
+              <span className="text-xs tracking-widest font-bold uppercase text-text-muted">
+                Read & Discover
               </span>
             </div>
 
@@ -54,8 +54,7 @@ export default function Architecture() {
 
         {/* Description */}
         <p className="text-text-muted max-w-lg leading-relaxed">
-          Our system introduces a preliminary intelligence layer, filtering noise
-          and verifying data integrity before human expertise is applied.
+         Researchers publish their work, while explorers read and discover research shared by the community.
         </p>
 
       </div>

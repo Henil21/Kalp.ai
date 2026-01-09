@@ -7,11 +7,16 @@ import { useAuth } from "../auth/AuthContext";
 import Navbar from "../components/layout/Navbar";
 import { AnimatePresence } from "framer-motion";
 
+const INITIAL_COUNT = 3;
+const LOAD_MORE_COUNT = 3;
+
 export default function Research() {
   const [research, setResearch] = useState([]);
   const [open, setOpen] = useState(false);
   const [selectedDomain, setSelectedDomain] = useState("ALL");
   const [selectedResearch, setSelectedResearch] = useState(null);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
+
   const { user } = useAuth();
 
   const fetchResearch = async () => {
@@ -23,6 +28,11 @@ export default function Research() {
     fetchResearch();
   }, []);
 
+  // reset pagination when domain changes
+  useEffect(() => {
+    setVisibleCount(INITIAL_COUNT);
+  }, [selectedDomain]);
+
   const domains = [
     "ALL",
     "Arificial Intelligence",
@@ -31,7 +41,7 @@ export default function Research() {
     "NLP",
     "Robotics",
     "Ethics",
-    "Philosophy"
+    "Philosophy",
   ];
 
   const filtered =
@@ -40,7 +50,9 @@ export default function Research() {
       : research.filter((r) => r.domain === selectedDomain);
 
   const featured = filtered[0];
-  const rest = filtered.slice(1);
+  const rest = filtered.slice(1, visibleCount + 1);
+
+  const hasMore = filtered.length > visibleCount + 1;
 
   return (
     <>
@@ -108,15 +120,24 @@ export default function Research() {
                 {featured.abstract}
               </p>
 
-              {featured.sourceCode && (
-                <a
-                  href={featured.sourceCode}
-                  target="_blank"
-                  className="text-sm font-bold underline underline-offset-4"
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setSelectedResearch(featured)}
+                  className="text-sm font-medium underline underline-offset-4"
                 >
-                  View Source Code →
-                </a>
-              )}
+                  Read Full Research →
+                </button>
+
+                {featured.sourceCode && (
+                  <a
+                    href={featured.sourceCode}
+                    target="_blank"
+                    className="text-sm font-bold underline underline-offset-4"
+                  >
+                    View Source Code →
+                  </a>
+                )}
+              </div>
             </div>
           )}
 
@@ -131,11 +152,24 @@ export default function Research() {
             ))}
           </div>
 
-          {/* ===== Load More ===== */}
+          {/* ===== Explore More / No More ===== */}
           <div className="flex justify-center pt-12">
-            <button className="text-sm font-medium hover:text-text-muted">
-              Explore More Research ↓
-            </button>
+            {hasMore ? (
+              <button
+                onClick={() =>
+                  setVisibleCount((c) => c + LOAD_MORE_COUNT)
+                }
+                className="text-sm font-medium hover:text-text-muted transition"
+              >
+                Explore More Research ↓
+              </button>
+            ) : (
+              filtered.length > 1 && (
+                <p className="text-sm text-text-muted">
+                  No more research to explore.
+                </p>
+              )
+            )}
           </div>
 
         </div>

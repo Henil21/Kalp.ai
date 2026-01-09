@@ -28,22 +28,13 @@ export default function Navbar() {
 
         {/* ===== Nav Links ===== */}
         <div className="hidden md:flex items-center gap-8">
-          <Link
-            to="/"
-            className="text-sm font-medium hover:text-text-muted"
-          >
+          <Link to="/" className="text-sm font-medium hover:text-text-muted">
             Home
           </Link>
-          <Link
-            to="/research"
-            className="text-sm font-medium hover:text-text-muted"
-          >
+          <Link to="/research" className="text-sm font-medium hover:text-text-muted">
             Research
           </Link>
-          <Link
-            to="/about"
-            className="text-sm font-medium hover:text-text-muted"
-          >
+          <Link to="/about" className="text-sm font-medium hover:text-text-muted">
             About
           </Link>
         </div>
@@ -68,9 +59,21 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <span className="hidden sm:block text-sm text-text-muted">
-                {user.name || user.email}
-              </span>
+              {/* Avatar */}
+              {/* Avatar */}
+              <Link to="/about" className="flex items-center gap-3">
+                {user.avatar?.image ? (
+                  <img
+                    src={user.avatar.image}
+                    alt={user.avatar.name}
+                    className="w-8 h-8 rounded-full object-cover border"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold">
+                    {user.name?.[0] || "U"}
+                  </div>
+                )}
+              </Link>
 
               <button
                 onClick={handleLogout}

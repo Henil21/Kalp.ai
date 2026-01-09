@@ -7,6 +7,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // 🔁 Restore session
   useEffect(() => {
     const token = localStorage.getItem("kalp_token");
     if (!token) {
@@ -24,8 +25,13 @@ export function AuthProvider({ children }) {
       .finally(() => setLoading(false));
   }, []);
 
-  const login = async (email, password) => {
-    const { data } = await api.post("/auth/login", { email, password });
+  // ✅ FIXED LOGIN SIGNATURE
+  const login = async ({ email, password }) => {
+    const { data } = await api.post("/auth/login", {
+      email,
+      password,
+    });
+
     localStorage.setItem("kalp_token", data.token);
     setUser(data.user);
   };
@@ -41,7 +47,7 @@ export function AuthProvider({ children }) {
     await api.post("/auth/request-otp", { email });
   };
 
-  const verifyOtp = async (email, otp) => {
+  const verifyOtp = async ({ email, otp }) => {
     const { data } = await api.post("/auth/verify-otp", { email, otp });
     localStorage.setItem("kalp_token", data.token);
     setUser(data.user);

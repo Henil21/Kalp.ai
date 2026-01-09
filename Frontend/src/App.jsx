@@ -1,76 +1,82 @@
-import PlanetScene from "./components/three/PlanetScene";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./pages/Home";
-import { AuthProvider } from "./auth/AuthContext";
+import { useState } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
+import { AuthProvider, useAuth } from "./auth/AuthContext";
 import ProtectedRoute from "./auth/ProtectedRoute";
 
-// import Home from "./pages/Home";
+import IntroVideo from "./components/IntroVideo";
+
+import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/SignUp";
 import Research from "./pages/Research";
 import About from "./pages/About";
 import VerifyOtp from "./pages/VerifyOtp";
 
-export default function App() {
-  return (
-    <>
-      <AuthProvider>
-        <BrowserRouter>
-          <Routes>
+/* =========================
+   Auth Gate Wrapper
+========================= */
+function AppRoutes() {
+  const { loading } = useAuth();
 
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/verify-otp" element={<VerifyOtp />} />
-
-
-            <Route
-              path="/research"
-              element={
-                <ProtectedRoute>
-                  <Research />
-                </ProtectedRoute>
-              }
-            />
-
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-
-                  <Home />
-                </ProtectedRoute>
-              }
-            />
-          <Route path="/about" element={<About />} />
-          </Routes>
-
-
-        </BrowserRouter>
-      </AuthProvider>
-      {/* 
-      <div className="w-screen h-screen bg-black">
-        <PlanetScene
-          planets={[
-            {
-              texture: "/textures/2k_eris_fictional.jpg",
-              size: 0.5,
-              distance: 2.6,
-              orbitSpeed: 0.05,     // 🔥 FAST
-              rotationSpeed: 0.01,
-              inclination: 0.45,   // yellow line style
-            },
-            {
-              texture: "/textures/2k_haumea_fictional.jpg",
-              size: 0.6,
-              distance: 4,
-              orbitSpeed: 0.035,
-              rotationSpeed: 0.008,
-              inclination: 0.6,    // different plane
-            },
-          ]}
-        />
+  // 🔒 Block routing until auth is resolved
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center text-text-muted">
+        Loading…
       </div>
-      */}
-    </>
+    );
+  }
+
+  return (
+    <BrowserRouter>
+      <Routes>
+
+        {/* 🌍 Default → Home (PUBLIC) */}
+        <Route path="/" element={<Navigate to="/home" replace />} />
+
+        {/* 🌍 Public routes */}
+        <Route path="/home" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/verify-otp" element={<VerifyOtp />} />
+
+        {/* 🔒 Protected routes */}
+        <Route
+          path="/research"
+          element={
+            <ProtectedRoute>
+              <Research />
+            </ProtectedRoute>
+          }
+        />
+
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+/* =========================
+   Main App
+========================= */
+export default function App() {
+  const [showIntro, setShowIntro] = useState(
+    !localStorage.getItem("introPlayed")
+  );
+
+  return (
+    <AuthProvider>
+      {showIntro ? (
+        <IntroVideo
+          onFinish={() => {
+            localStorage.setItem("introPlayed", "true");
+            setShowIntro(false);
+          }}
+        />
+      ) : (
+        <AppRoutes />
+      )}
+    </AuthProvider>
   );
 }

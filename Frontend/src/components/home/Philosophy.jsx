@@ -6,24 +6,24 @@ export default function Philosophy() {
         <div className="flex flex-col md:flex-row justify-between gap-6">
           <h2 className="text-4xl font-serif italic">Our Philosophy</h2>
           <p className="text-text-muted max-w-sm text-sm">
-            We believe scientific discourse should be fluid, interconnected,
-            and rigorously verified by intelligence.
+            We believe research should be open, accessible, and easy to share
+            across communities.
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
           {[
             {
-              icon: "visibility",
-              title: "Pre-Review Intelligence",
+              icon: "publish",
+              title: "Open Publishing",
               text:
-                "AI-driven analysis to identify claims and gaps before human review.",
+                "A simple space for researchers to share their work with a wider audience.",
             },
             {
-              icon: "hub",
-              title: "Global Connection",
+              icon: "public",
+              title: "Shared Discovery",
               text:
-                "Connecting research across languages and disciplines.",
+                "Helping explorers discover research across topics and disciplines.",
             },
           ].map((c) => (
             <div

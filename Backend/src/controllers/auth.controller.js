@@ -4,6 +4,9 @@ import jwt from "jsonwebtoken";
 import Otp from "../models/otp.js";
 import { sendEmail } from "../utils/sendEmail.js";
 
+/* =========================
+   Utils
+========================= */
 
 const generateToken = (user) =>
   jwt.sign(
@@ -12,223 +15,244 @@ const generateToken = (user) =>
     { expiresIn: "7d" }
   );
 
-// 🔐 SIGNUP
+/* =========================
+   SIGNUP
+========================= */
+
 export const signup = async (req, res) => {
-  const { name, email, password, role, expertise } = req.body;
+  try {
+    const { name, email, password, role, expertise, avatar } = req.body;
 
-  const exists = await User.findOne({ email });
-  if (exists) {
-    return res.status(400).json({ message: "User already exists" });
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  const user = await User.create({
-    name,
-    email,
-    password: hashedPassword,
-    role,
-    expertise
-  });
-
-  res.status(201).json({
-    token: generateToken(user),
-    user: {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      expertise: user.expertise
+    const exists = await User.findOne({ email });
+    if (exists) {
+      return res.status(400).json({ message: "User already exists" });
     }
-  });
+
+    if (!avatar || !avatar.name || !avatar.image) {
+      return res.status(400).json({ message: "Avatar is required" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      role,
+      expertise,
+      avatar
+    });
+
+    res.status(201).json({
+      token: generateToken(user),
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        expertise: user.expertise,
+        avatar: user.avatar
+      }
+    });
+  } catch (err) {
+    console.error("Signup error:", err);
+    res.status(500).json({ message: "Signup failed" });
+  }
 };
 
-// 🔐 LOGIN
+/* =========================
+   LOGIN
+========================= */
+
 export const login = async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  const user = await User.findOne({ email });
-  if (!user) {
-    return res.status(401).json({ message: "Invalid credentials" });
-  }
-
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) {
-    return res.status(401).json({ message: "Invalid credentials" });
-  }
-
-  res.json({
-    token: generateToken(user),
-    user: {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      expertise: user.expertise
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: "Invalid credentials" });
     }
-  });
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    res.json({
+      token: generateToken(user),
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        expertise: user.expertise,
+        avatar: user.avatar
+      }
+    });
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ message: "Login failed" });
+  }
 };
 
+/* =========================
+   REQUEST OTP
+========================= */
 
-// 📩 REQUEST OTP
 export const requestOtp = async (req, res) => {
-  const { email } = req.body;
+  try {
+    const { email } = req.body;
 
-  if (!email) {
-    return res.status(400).json({ message: "Email required" });
-  }
+    if (!email) {
+      return res.status(400).json({ message: "Email required" });
+    }
 
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
 
-  await Otp.deleteMany({ email }); // invalidate old OTPs
+    await Otp.deleteMany({ email });
 
-  await Otp.create({
-    email,
-    code,
-    expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 min
-  });
+    await Otp.create({
+      email,
+      code,
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000)
+    });
 
-  // TODO: send email here (console for now)
-  // console.log("OTP for", email, ":", code);//
- await sendEmail({
-  to: email,
-  subject: "Your Kalp Labs Login Code",
-  html: `
-    <div style="
-      background-color:#f7f7f4;
-      padding:40px 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-    ">
-      <div style="
-        max-width:520px;
-        margin:0 auto;
-        background:#ffffff;
-        border-radius:12px;
-        padding:32px;
-        border:1px solid #e6e6db;
-      ">
-
-        <!-- Header -->
-        <div style="text-align:center; margin-bottom:24px;">
-          <h1 style="
-            margin:0;
-            font-family: Georgia, 'Times New Roman', serif;
-            font-style: italic;
-            font-size:26px;
-            color:#111;
-          ">
-            Kalp Labs
-          </h1>
-          <p style="
-            margin-top:6px;
-            font-size:14px;
-            color:#777;
-          ">
-            Secure Login Verification
-          </p>
-        </div>
-
-        <!-- Body -->
-        <p style="
-          font-size:15px;
-          color:#333;
-          line-height:1.6;
-        ">
-          You requested a one-time verification code to sign in to your Kalp Labs account.
-        </p>
-
-        <div style="
-          margin:24px 0;
-          text-align:center;
-        ">
-          <div style="
-            display:inline-block;
-            padding:14px 28px;
-            font-size:28px;
-            letter-spacing:6px;
-            font-weight:600;
-            border-radius:10px;
-            background:#111;
-            color:#ffffff;
-          ">
-            ${code}
+    await sendEmail({
+      to: email,
+      subject: "Your Kalp Labs Login Code",
+      html: `
+        <div style="background:#f7f7f4;padding:40px 0;">
+          <div style="max-width:520px;margin:auto;background:#fff;border-radius:12px;padding:32px;border:1px solid #e6e6db;">
+            <h2 style="text-align:center;font-family:Georgia;font-style:italic;">Kalp Labs</h2>
+            <p>Your OTP code is:</p>
+            <div style="text-align:center;font-size:28px;font-weight:600;letter-spacing:6px;">
+              ${code}
+            </div>
+            <p>This code expires in 5 minutes.</p>
           </div>
         </div>
+      `
+    });
 
-        <p style="
-          font-size:14px;
-          color:#555;
-          line-height:1.6;
-        ">
-          This code will expire in <strong>5 minutes</strong>.  
-          If you did not request this, you can safely ignore this email.
-        </p>
-
-        <!-- Divider -->
-        <hr style="
-          border:none;
-          border-top:1px solid #eee;
-          margin:32px 0;
-        " />
-
-        <!-- Footer -->
-        <p style="
-          font-size:12px;
-          color:#888;
-          text-align:center;
-          line-height:1.5;
-        ">
-          © ${new Date().getFullYear()} Kalp Labs  
-          <br />
-          Building trust in research collaboration
-        </p>
-
-      </div>
-    </div>
-  `,
-});
-
-res.json({ message: "OTP sent" });
-
+    res.json({ message: "OTP sent" });
+  } catch (err) {
+    console.error("OTP error:", err);
+    res.status(500).json({ message: "Failed to send OTP" });
+  }
 };
-// ✅ VERIFY OTP
+
+/* =========================
+   VERIFY OTP
+========================= */
+
 export const verifyOtp = async (req, res) => {
-  const { email, otp } = req.body;
+  try {
+    const { email, otp } = req.body;
 
-  const record = await Otp.findOne({ email, code: otp });
+    const record = await Otp.findOne({ email, code: otp });
+    if (!record) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
 
-  if (!record) {
-    return res.status(400).json({ message: "Invalid OTP" });
-  }
+    if (record.expiresAt < new Date()) {
+      await record.deleteOne();
+      return res.status(400).json({ message: "OTP expired" });
+    }
 
-  if (record.expiresAt < new Date()) {
     await record.deleteOne();
-    return res.status(400).json({ message: "OTP expired" });
+
+    let user = await User.findOne({ email });
+
+    // Auto-register if new user
+    if (!user) {
+      user = await User.create({
+        name: email.split("@")[0],
+        email,
+        password: "OTP_LOGIN",
+        role: "EXPLORER",
+        avatar: {
+          name: "TARS",
+          image:
+            "https://ih1.redbubble.net/image.782884253.3467/bg,f8f8f8-flat,750x,075,f-pad,750x1000,f8f8f8.u10.jpg"
+        }
+      });
+    }
+
+    res.json({
+      token: generateToken(user),
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        expertise: user.expertise,
+        avatar: user.avatar
+      }
+    });
+  } catch (err) {
+    console.error("Verify OTP error:", err);
+    res.status(500).json({ message: "OTP verification failed" });
   }
+};
 
-  await record.deleteOne(); // one-time use
+/* =========================
+   CHANGE PASSWORD
+========================= */
 
-  let user = await User.findOne({ email });
+export const changePassword = async (req, res) => {
+  try {
+    const userId = req.user.id; // ✅ FIXED HERE
+    const { currentPassword, newPassword } = req.body;
 
-  // Auto-register if new user
-  if (!user) {
-    user = await User.create({
-      name: email.split("@")[0],
-      email,
-      password: "OTP_LOGIN", // placeholder
-      role: "EXPLORER"
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        message: "Current password and new password are required",
+      });
+    }
+
+    const user = await User.findById(userId).select("+password");
+
+    // ✅ SAFETY CHECK
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    // ❌ OTP users cannot change password
+    if (user.password === "OTP_LOGIN") {
+      return res.status(400).json({
+        message: "Password change not available for OTP accounts",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
+
+    if (!isMatch) {
+      return res.status(401).json({
+        message: "Current password is incorrect",
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        message: "Password must be at least 6 characters long",
+      });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    res.json({
+      message: "Password changed successfully",
+    });
+  } catch (err) {
+    console.error("Change password error:", err);
+    res.status(500).json({
+      message: "Failed to change password",
     });
   }
-
-  res.json({
-    token: generateToken(user),
-    user: {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      expertise: user.expertise
-    }
-  });
 };
-

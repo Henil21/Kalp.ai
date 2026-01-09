@@ -1,7 +1,15 @@
+import { useState } from "react";
+
 import { Link } from "react-router-dom";
+import HeroPreview from "./HeroPreview";
+// import { Link } from "react-router-dom";
 
 export default function Hero() {
+
+    const [open, setOpen] = useState(false);
+
   return (
+    <>
     <section className="flex justify-center px-6 py-20">
       <div className="max-w-6xl grid lg:grid-cols-2 gap-12 items-center">
 
@@ -9,31 +17,33 @@ export default function Hero() {
           <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border bg-white/50 w-fit">
             <span className="size-2 rounded-full bg-primary animate-pulse"></span>
             <span className="text-xs uppercase text-text-muted">
-              Research Beta 2.0
+              Research Platform · Beta
             </span>
           </span>
 
           <h1 className="text-6xl lg:text-7xl font-serif italic leading-tight">
-            Accelerating the <br />
+            A Space to <br />
             <span className="border-b-4 border-primary/60">
-              Speed of Truth.
+              Share & Explore Research.
             </span>
           </h1>
 
           <p className="text-text-muted text-lg max-w-md">
-            AI-assisted pre-review and discovery for the modern researcher.
+            Publish research openly or explore work shared by the community.
           </p>
 
           <div className="flex gap-4">
-           
-          <Link to="/research">
-  <button className="h-12 px-8 rounded-full bg-text-main text-white hover:bg-text-muted transition">
-    Explore the Lab
-  </button>
-          </Link>
+            <Link to="/research">
+              <button className="h-12 px-8 rounded-full bg-text-main text-white hover:bg-text-muted transition">
+                Explore the Lab
+              </button>
+            </Link>
 
-            <button className="h-12 px-8 rounded-full border bg-white">
-              View Methodology
+            <button 
+               onClick={() => setOpen(true)}
+                className="h-12 px-8 rounded-full border bg-white"
+              >
+              Learn More
             </button>
           </div>
         </div>
@@ -51,5 +61,7 @@ export default function Hero() {
 
       </div>
     </section>
+    {open && <HeroPreview onClose={() => setOpen(false)} />}
+    </>
   );
 }

@@ -29,6 +29,18 @@ const userSchema = new mongoose.Schema(
     expertise: {
       type: [String],
       default: []
+    },
+
+    // ✅ NEW: avatar / logo per user
+    avatar: {
+      name: {
+        type: String,
+        required: true
+      },
+      image: {
+        type: String,
+        required: true
+      }
     }
   },
   {
