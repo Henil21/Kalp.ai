@@ -1,5 +1,9 @@
 export const sendEmail = async ({ to, subject, otp }) => {
   try {
+    if (!otp) {
+      throw new Error("OTP is required to send email");
+    }
+
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 520px; margin: auto; padding: 20px;">
         <h2 style="margin-bottom: 10px;">Kalp Labs</h2>
@@ -45,7 +49,7 @@ export const sendEmail = async ({ to, subject, otp }) => {
           email: process.env.BREVO_SENDER_EMAIL,
         },
         to: [{ email: to }],
-        subject: subject || "Kalp Labs – Verify your OTP",
+        subject: subject ?? "Kalp Labs – Verify your OTP",
         htmlContent: html,
       }),
     });
@@ -54,13 +58,13 @@ export const sendEmail = async ({ to, subject, otp }) => {
 
     if (!res.ok) {
       console.error("❌ Brevo error:", data);
-      throw new Error("Email sending failed");
+      throw new Error(data.message || "Email sending failed");
     }
 
-    console.log("✅ Brevo email sent:", data);
+    console.log("✅ Brevo email sent:", data.messageId);
     return data;
   } catch (error) {
-    console.error("❌ sendEmail failed:", error);
+    console.error("❌ sendEmail failed:", error.message);
     throw error;
   }
 };
