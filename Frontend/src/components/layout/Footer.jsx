@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SpaceCanvas from "../../components/space/SpaceCanvas";
 import { footerPlanets } from "../../components/space/footerPlanets";
-// import inquiry from "../../api/inquiry"; 
 
 export default function Footer() {
   const [form, setForm] = useState({
@@ -25,14 +24,23 @@ export default function Footer() {
     setError(false);
 
     try {
-      const res = await fetch("http://localhost:5000/api/inquiry", {
+      const res = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          access_key: "5c39e495-f286-4516-9fc3-4ff46e83aafd", // web3forms access key
+          name: form.name,
+          email: form.email,
+          message: form.message,
+          subject: "Footer Inquiry - Kalp Lab",
+        }),
       });
 
+      const data = await res.json();
 
-      if (!res.ok) throw new Error("Failed");
+      if (!data.success) throw new Error("Submission failed");
 
       setSuccess(true);
       setForm({ name: "", email: "", message: "" });
@@ -64,19 +72,19 @@ export default function Footer() {
         </div>
 
         {/* Heading */}
-        <h2 className="text-4xl md:text-5xl font-serif italic leading-[1.2] text-text-main">
+        <h2 className="text-4xl md:text-5xl font-serif italic text-text-main">
           Let’s connect.
         </h2>
 
         {/* Subtext */}
-        <p className="text-text-muted text-base md:text-lg max-w-md leading-relaxed">
+        <p className="text-text-muted max-w-md">
           Have a question or idea? Send us a quick inquiry.
         </p>
 
-        {/* ✅ INQUIRY FORM */}
+        {/* ✅ FORM */}
         <form
           onSubmit={handleSubmit}
-          className="flex flex-col gap-4 w-full max-w-md mt-4"
+          className="flex flex-col gap-4 w-full max-w-md"
         >
           <input
             type="text"
@@ -115,38 +123,25 @@ export default function Footer() {
             {loading ? "Sending..." : "Send Inquiry"}
           </button>
 
-          {/* Feedback */}
+          {/* ✅ SUCCESS MESSAGE */}
           {success && (
-            <p className="text-green-600 text-sm mt-2">
-              ✔ Inquiry sent successfully.
+            <p className="text-green-600 text-sm text-center mt-2">
+              ✔ Inquiry sent successfully. I’ll get back to you soon!
             </p>
           )}
 
+          {/* ❌ ERROR MESSAGE */}
           {error && (
-            <p className="text-red-600 text-sm mt-2">
+            <p className="text-red-600 text-sm text-center mt-2">
               ✖ Something went wrong. Please try again.
             </p>
           )}
         </form>
 
-        {/* Links */}
-        <div className="flex gap-10 mt-12 text-sm text-text-muted font-medium">
-          <a href="#" className="hover:text-text-main transition">
-            Privacy Policy
-          </a>
-          <a href="#" className="hover:text-text-main transition">
-            Terms
-          </a>
-          <a href="#" className="hover:text-text-main transition">
-            Contact
-          </a>
-        </div>
-
-        {/* Copyright */}
+        {/* Footer Bottom */}
         <div className="text-xs text-stone-300 mt-6">
           © 2024 Kalp Lab. All rights reserved.
         </div>
-
       </div>
     </footer>
   );

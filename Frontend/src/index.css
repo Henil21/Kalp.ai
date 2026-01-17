@@ -36,3 +36,24 @@
 .animate-float {
   animation: floatRotate 12s ease-in-out infinite;
 }
+.top-loader-bar {
+  height: 100%;
+  width: 30%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #000,
+    #f5c400,
+    transparent
+  );
+  animation: top-loading 1.1s ease-in-out infinite;
+}
+
+@keyframes top-loading {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}

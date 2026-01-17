@@ -1,8 +1,12 @@
 import { useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
-import { AuthProvider, useAuth } from "./auth/AuthContext";
+import { useAuth } from "./auth/AuthContext";
 import ProtectedRoute from "./auth/ProtectedRoute";
+
+import { useLoader } from "./context/LoaderContext";
+import TopLoader from "./components/TopLoader";
+import RouteLoader from "./components/RouteLoader";
 
 import IntroVideo from "./components/IntroVideo";
 
@@ -14,13 +18,13 @@ import About from "./pages/About";
 import VerifyOtp from "./pages/VerifyOtp";
 
 /* =========================
-   Auth Gate Wrapper
+   Routes
 ========================= */
 function AppRoutes() {
-  const { loading } = useAuth();
+  const { loading: authLoading } = useAuth();
 
-  // 🔒 Block routing until auth is resolved
-  if (loading) {
+  // 🔒 Wait for auth to resolve
+  if (authLoading) {
     return (
       <div className="h-screen flex items-center justify-center text-text-muted">
         Loading…
@@ -29,31 +33,27 @@ function AppRoutes() {
   }
 
   return (
-    <BrowserRouter>
-      <Routes>
+    <Routes>
+      {/* 🌍 Default */}
+      <Route path="/" element={<Navigate to="/home" replace />} />
 
-        {/* 🌍 Default → Home (PUBLIC) */}
-        <Route path="/" element={<Navigate to="/home" replace />} />
+      {/* 🌍 Public routes */}
+      <Route path="/home" element={<Home />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
+      <Route path="/verify-otp" element={<VerifyOtp />} />
 
-        {/* 🌍 Public routes */}
-        <Route path="/home" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/verify-otp" element={<VerifyOtp />} />
-
-        {/* 🔒 Protected routes */}
-        <Route
-          path="/research"
-          element={
-            <ProtectedRoute>
-              <Research />
-            </ProtectedRoute>
-          }
-        />
-
-      </Routes>
-    </BrowserRouter>
+      {/* 🔒 Protected */}
+      <Route
+        path="/research"
+        element={
+          <ProtectedRoute>
+            <Research />
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
   );
 }
 
@@ -65,8 +65,17 @@ export default function App() {
     !localStorage.getItem("introPlayed")
   );
 
+  const { loading } = useLoader(); // 🌍 GLOBAL loader
+
   return (
-    <AuthProvider>
+    <>
+      {/* 🔝 Top Progress Loader */}
+      {loading && <TopLoader />}
+
+      {/* 🔄 Route change loader */}
+      <RouteLoader />
+
+      {/* 🎬 Intro Video */}
       {showIntro ? (
         <IntroVideo
           onFinish={() => {
@@ -77,6 +86,6 @@ export default function App() {
       ) : (
         <AppRoutes />
       )}
-    </AuthProvider>
+    </>
   );
 }
